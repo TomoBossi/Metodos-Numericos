@@ -1,0 +1,6 @@
+\Function{AutovalorDominante}{$A$, $v$}
+    \State $scale \gets \|v\|^2$
+    \State $\lambda \gets v^T \cdot A \cdot v$ 
+    \State $\lambda \gets \frac{\lambda}{scale}$
+    \State \Return $\lambda$
+\EndFunction

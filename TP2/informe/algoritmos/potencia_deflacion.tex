@@ -1,0 +1,15 @@
+\Function{PotenciaConDeflacion}{$A$, $num$, $niter$, $eps$}
+    \State $numRows \gets \text{\# de filas de } A$
+    \State $R \gets \text{Matriz de tamaño } (numRows + 1) \times numRows$ \Comment{Inicializa matriz de rdos.}
+    \State $M \gets A$ \Comment{Inicializa matriz desinflada}
+    \State $a \gets \text{Vector de tamaño } num$ \Comment{Vector de autovalores}
+    \For{$i \gets 0$ to $num - 1$}
+        \State $v \gets \text{MetodoPotencia}(M, niter, eps)$
+        \State $\lambda \gets \text{AutovalorDominante}(M, v)$
+        \State $R[i,:] \gets v^T$ \Comment{Asigna fila i-ésima}
+        \State $a[i] \gets \lambda$ \Comment{Asigna elemento i-ésimo}
+        \State $M \gets M - \lambda \cdot (v \cdot v^T)$ \Comment{Desinfla matriz}
+    \EndFor
+    \State $R[numRows,:] \gets a^T$ \Comment{Asigna última fila}
+    \State \Return $R$
+\EndFunction

@@ -1,0 +1,16 @@
+\subsection{Laplaciano discreto}
+\label{aplicaciones_laplaciano}
+
+Utilizando $L$, la matriz tridiagonal del operador laplaciano unidimensional, y mediante el uso del algoritmo de eliminación gaussiana para sistemas tridiagonales con precómputo (\algoref{alg:EG_tridiagonal_precomputo} y \algoref{alg:sol_tridiag_precomputo}), se encontraron vectores solución $u$ para los sistemas $Lu=d$ dados por los siguientes vectores de términos independientes, todos de dimensión $n=101$:
+\begin{enumerate}[label=(\alph*)]
+    \item $d^a_i = \begin{cases}0\\4/n\phantom{...}i=\lfloor n/2 \rfloor+1\end{cases}$
+    \item $d^b_i = 4/n^2$
+    \item $d^c_i = 12(-1+2i/(n-1))/n^2$
+\end{enumerate}
+Como $L$ es la aproximación discreta al operador Laplaciano, haber resuelto estos sistemas implica haber encontrado, de manera aproximada, la función (dada de manera discreta por $u$) correspondiente a su respectiva derivada segunda (dada de manera discreta por $d$). La figura \ref{fig:laplaciano_discreto} muestra el resultado de graficar los vectores solución $u^a$, $u^b$ y $u^c$, provenientes de resolver el sistema para sus respectivos $d$.
+
+\begin{figure}[h!]
+    \centering\includesvg[width=0.6\textwidth]{imgs/integrales_derivadas_segundas.svg}
+    \caption{Gráficos de las funciones halladas para cada una de las derivadas segundas dadas por $d_a$, $d_b$ y $d_c$. Concretamente, se muestra el resultado de graficar $u_a$, $u_b$ y $u_c$ vs $x$, donde para $x$ se eligió de manera arbitraria el rango de 0 a 100 inclusive.}
+    \label{fig:laplaciano_discreto}
+\end{figure}

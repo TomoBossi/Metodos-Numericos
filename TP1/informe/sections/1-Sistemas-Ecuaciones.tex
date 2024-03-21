@@ -1,0 +1,193 @@
+\section{Sistemas de ecuaciones}
+\label{sistemas_de_ecuaciones}
+
+\subsection{Eliminación gaussiana sin pivoteo}
+\label{sistemas_de_ecuaciones_EG_sin}
+
+El algoritmo de EG sin pivoteo (\algoref{alg:eg_sin_pivoteo}) es el más sencillo y elemental de los algoritmos de su tipo, y consta de dos etapas. La primera consiste en eliminar los elementos debajo de la diagonal de la matriz aumentada de coeficientes, yendo desde la primera fila hasta la última y usando como pivote al elemento en la diagonal correspondiente a cada paso de la triangulación (\algoref{alg:triangulación_sin_pivoteo}). Si el algoritmo encuentra un 0 en la posición de la diagonal que corresponde al paso actual de triangulación, no puede continuar ni hallar la solución del sistema. Si el algoritmo termina de triangular a la matriz y no quedan elementos nulos en su diagonal puede realizarse la segunda etapa, que consiste en despejar el valor de todos los elementos del vector solución $x$, yendo desde la última fila de la matriz hacia la primera, a lo que se le conoce como \textit{backwards substitution} (\algoref{alg:solución_única}).
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$A$ matriz de coeficientes cuadrada}
+\Require{$b$ vector de términos independientes del sistema Ax=b}
+\Ensure{$x$ vector columna solución única del sistema Ax=b. Si no existe solución única o no puede encontrarse sin realizar pivoteo, devuelve una excepción}
+\Function{$solucion\_sistema\_lineal\_eliminacion\_gaussiana\_sin\_pivoteo$}{$A$, $b$}
+    \State $A' \gets concatenar(A, b)$ \Comment{$A'$ es la matriz aumentada}
+    \State $A' \gets escalonar\_matriz\_sin\_pivoteo(A')$ \Comment{\algoref{alg:triangulación_sin_pivoteo}}
+    \State $x \gets solucion\_unica\_sistema\_lineal(A', 0)$ \Comment{\algoref{alg:solución_única}}
+    \State \textbf{return} $x$
+\EndFunction
+\end{algorithmic}
+\caption{EG sin pivoteo}
+\label{alg:eg_sin_pivoteo}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$A'$ matriz de coeficientes aumentada de dimensiones $n$\texttt{x}$n+1$}
+\Ensure{$A'$ matriz de coeficientes aumentada triangulada sin pivoteo. Si no puede realizarse la triangulación sin pivoteo (se encuentra un 0 en la diagonal en algún paso) devuelve una excepción}
+\Function{$escalonar\_matriz\_sin\_pivoteo$}{$A'$}
+    \For{$i = 1 \hdots n$}
+        \If{$a'_{ii}== 0$ \&\& $a'_{i+1,...,n;i} == 0$}
+            \State \textbf{then return Exception:} ''No puede encontrarse solución única''
+        \EndIf
+        \For{$j = i+1 \hdots n$}
+            % \If{$a'_{ji} \neq 0$}
+            \State $m_{ij} \gets a'_{ji}/a'_{ii}$
+            \State $A'_j \gets A'_j - A'_i * m_{ij}$ \Comment{\algoref{alg:suma_matricial} y \algoref{alg:producto_por_escalar}}
+            % \EndIf
+        \EndFor
+    \EndFor
+    \State \textbf{return} $A'$
+\EndFunction
+\end{algorithmic}
+\caption{Triangulación sin pivoteo}
+\label{alg:triangulación_sin_pivoteo}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$A'$ matriz de coeficientes aumentada triangulada de dimensiones $n$\texttt{x}$n+1$}
+\Require{$atol$ tolerancia absoluta para la comparación con el 0}
+\Ensure{$x$ vector columna solución única del sistema Ax=b. Si no existe solución única o no puede encontrarse sin realizar pivoteo, devuelve una excepción Si en algún paso se debe dividir por un número cercano a 0 (cercano de acuerdo a $atol$), imprime una advertencia}
+\Function{$solucion\_unica\_sistema\_lineal$}{$A'$}
+    \State $x \gets [\phantom{.}]$
+    \For{$i = n \hdots 1$}
+        \State \textbf{if} $a'_{ii}== 0$ \textbf{then return Exception:} ''No puede encontrarse solución única''
+        \State \textbf{if} $|a'_{ii}| < atol$ \textbf{then print:} ''Advertencia: división por valor cercano a 0''
+        \State $b_i \gets a'_{i(n+1)}$ \Comment{término independiente}
+        \State $suma\_terminos \gets x \cdot \begin{bsmallmatrix}a'_{i(i+1)} & a'_{i(i+2)} & \hdots & a'_{in}\end{bsmallmatrix}$ \Comment{\algoref{alg:producto_escalar}}
+        \State $x_i \gets (b_{i} - suma\_terminos)/a_{ii}$
+        \State $x \gets concatenar([x_i], x)$ \Comment{agrega $x_i$ al principio de $x$}
+    \EndFor
+    \State \textbf{return} $x$
+\EndFunction
+\end{algorithmic}
+\caption{Solución única de sistema pretriangulado}
+\label{alg:solución_única}
+\end{algorithm}
+
+\subsection{Eliminación gaussiana con pivoteo}
+\label{sistemas_de_ecuaciones_EG_con}
+
+El algoritmo sin pivoteo puede ser levemente modificado para incorporar pivoteo parcial, que implica la posibilidad de realizar intercambios entre filas de la matriz aumentada de coeficientes (\algoref{alg:eg_con_pivoteo}, \algoref{alg:triangulación_con_pivoteo}). Como se ejemplificará en la sección \ref{sistemas_de_ecuaciones_casos}, esto permite resolver sistemas que son irresolubles sin pivoteo. Para intercambiar filas el algoritmo busca el mejor pivote posible, aquel elemento de la columna a ser eliminada (sobre la diagonal de la matriz o debajo de ella) de valor máximo en módulo. Esto evita divisiones por números pequeños, reduciendo el error numérico en las soluciones halladas.
+
+% El algoritmo sin pivoteo puede ser levemente modificado para incorporar pivoteo parcial, que implica la posibilidad de realizar intercambios entre filas de la matriz aumentada de coeficientes (\algoref{alg:triangulación_con_pivoteo}). Como se ejemplificará en la sección \ref{sistemas_de_ecuaciones_casos}, esto permite resolver sistemas que son irresolubles sin pivoteo. Para intercambiar filas el algoritmo busca el mejor pivote posible, aquel elemento de la columna a ser eliminada (sobre la diagonal de la matriz o debajo de ella) de valor máximo en módulo. Esto evita divisiones por números pequeños, reduciendo el error numérico en las soluciones halladas.
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$A$ matriz de coeficientes cuadrada}
+\Require{$b$ vector de términos independientes del sistema Ax=b}
+\Require{$atol$ tolerancia absoluta para la comparación con el 0}
+\Ensure{$x$ vector columna solución única del sistema Ax=b. Si no existe solución única, devuelve una excepción}
+\Function{$solucion\_sistema\_lineal\_eliminacion\_gaussiana\_pivoteo\_parcial$}{$A$, $b$, $atol$}
+    \State $A' \gets concatenar(A, b)$ \Comment{$A'$ es la matriz aumentada}
+    \State $A' \gets escalonar\_matriz\_pivoteo\_parcial(A', atol)$ \Comment{\algoref{alg:triangulación_con_pivoteo}}
+    \State $x \gets solucion\_unica\_sistema\_lineal(A', atol)$ \Comment{\algoref{alg:solución_única}}
+    \State \textbf{return} $x$
+\EndFunction
+\end{algorithmic}
+\caption{EG con pivoteo parcial}
+\label{alg:eg_con_pivoteo}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$A'$ matriz de coeficientes aumentada de dimensiones $n$\texttt{x}$n+1$}
+\Require{$atol$ tolerancia absoluta para la comparación con el 0}
+\Ensure{$A'$ matriz de coeficientes aumentada triangulada con pivoteo parcial. Si se determina que no existe solución única para el sistema $Ax=b$ (se encuentra que 0 es el mejor pivote en algún paso) devuelve una excepción}
+\Function{$escalonar\_matriz\_pivoteo\_parcial$}{$A'$, $atol$}
+    \For{$i = 0 \hdots n$}
+        \State $p \gets a'_{ii}$
+        \State $idp \gets i$
+        \For{$j = i+1 \hdots n$}
+            \If{$|a'_{ji}| > |p|$}
+                \State $p \gets a'_{ji}$
+                \State $idp \gets j$
+            \EndIf
+        \EndFor
+        \State $fila\_pivote \gets A'_{idp}$
+        \State $A'_{idp} \gets A'_i$
+        \State $A'_i \gets fila\_pivote$
+        \State \textbf{if} $p== 0$ \textbf{then return Exception:} ''No puede encontrarse solución única''
+        \State \textbf{if} $|p| < atol$ \textbf{then print:} ''Advertencia: división por valor cercano a 0''
+        \For{$j = i+1 \hdots n$}
+            % \If{$a'_{ji} \neq 0$}
+            \State $m_{ij} \gets a'_{ji}/p$
+            \State $A'_j \gets A'_j - A'_i * m_{ij}$ \Comment{\algoref{alg:suma_matricial} y \algoref{alg:producto_por_escalar}}
+            % \EndIf
+        \EndFor
+    \EndFor
+    \State \textbf{return} $A'$
+\EndFunction
+\end{algorithmic}
+\caption{Triangulación con pivoteo parcial}
+\label{alg:triangulación_con_pivoteo}
+\end{algorithm}
+
+\subsection{Observaciones sobre sistemas particulares} 
+\label{sistemas_de_ecuaciones_casos}
+
+Sean los siguientes sistemas de ecuaciones:
+\[
+(a) 
+\begin{bmatrix}
+    0  &  1      \\
+    1  &  2      
+\end{bmatrix}
+\begin{bmatrix}
+    x_1          \\
+    x_2      
+\end{bmatrix} 
+= 
+\begin{bmatrix}
+    1            \\
+    1 
+\end{bmatrix} 
+% \phantom{........}
+\phantom{..}
+(b) 
+\begin{bmatrix}
+    1  &  1      \\
+    1  &  1      
+\end{bmatrix}
+\begin{bmatrix}
+    x_1          \\
+    x_2      
+\end{bmatrix} 
+= 
+\begin{bmatrix}
+    1            \\
+    1 
+\end{bmatrix}
+% \phantom{........}
+\phantom{..}
+(c) 
+\begin{bmatrix}
+    2\epsilon & 2 \\
+    \epsilon & 2-\epsilon
+\end{bmatrix}
+\begin{bmatrix}
+    x_1          \\
+    x_2          \\
+    % x_3          \\
+    % x_4          \\
+    % x_5          \\
+\end{bmatrix} 
+= 
+\begin{bmatrix}
+    2+\beta      \\
+    2            \\
+    % 17           \\
+    % 7            \\
+    % 17           \\
+\end{bmatrix} 
+\]
+
+Donde $\epsilon = 10^{-15}$ y $\beta = 2.220446049250313\times 10^{-15}$. $(a)$ Es un sistema no resoluble realizando EG sin pivoteo (\algoref{alg:eg_sin_pivoteo}) pero sí con pivoteo parcial (\algoref{alg:eg_con_pivoteo}), $(b)$ es un sistema no resoluble por EG con o sin pivoteo parcial por tener infinitas soluciones, y $(c)$ es un sistema cuya solución exacta es aproximadamente $x_{real} = \begin{bsmallmatrix}1 & 1\end{bsmallmatrix}^T$, pero que al aplicarle EG con pivoteo parcial con $atol = 10\epsilon$ (\algoref{alg:eg_con_pivoteo}) ocasiona que dispare la advertencia por división por un número pequeño y produce una solución incorrecta a causa de error numérico, aproximadamente $x_{exp} = \begin{bsmallmatrix}1.11 & 1\end{bsmallmatrix}^T$. La matriz del sistema $(c)$ tiene número de condición de aproximadamente $\kappa = 4\times10^{15}$.
+
+% \begin{enumerate}[label=(\alph*)]
+%     \item Es un sistema no resoluble realizando EG sin pivoteo (\algoref{alg:eg_sin_pivoteo}) pero sí con pivoteo parcial (\algoref{alg:eg_con_pivoteo}).
+%     \item Es un sistema no resoluble por EG, con o sin pivoteo parcial, por tener infinitas soluciones.
+%     \item Es un sistema cuya solución exacta es $x_{real} = \begin{bsmallmatrix}-1\\1\end{bsmallmatrix}$, pero que al aplicarle EG con pivoteo parcial con $atol = 0.01$ (\algoref{alg:eg_con_pivoteo}) ocasiona que dispare la advertencia por división por un número pequeño y produce una solución aproximada por error numérico ($x_{exp} = \begin{bsmallmatrix}-0.9999999999999551\\0.9999999999999776\end{bsmallmatrix}$).
+% \end{enumerate}

@@ -1,0 +1,47 @@
+\subsection{Simulaci\'on de proceso de difusi\'on}
+\label{aplicaciones_difusion}
+
+Partiendo de la ecuación de difusión discreta en una dimensión,
+
+\begin{equation}
+\begin{split}
+    u_i^{(k)} - u_i^{(k-1)} = \alpha(u_{i-1}^{(k)} - 2u_i^{(k)} + u_{i+1}^{(k)})
+\end{split}
+\label{eq:difusión}
+\end{equation}
+
+Distribuyendo $\alpha$ y reordenando los terminos para despejar $u_i^{(k-1)}$ se obtiene:
+
+\begin{equation}
+\begin{split}
+    u_i^{(k-1)} = -\alpha u_{i-1}^{(k)} + (2\alpha + 1) u_i^{(k)} - \alpha u_{i+1}^{(k)}
+\end{split}
+\label{eq:difusión_despeje}
+\end{equation}
+
+De \eqref{eq:difusión_despeje} se deduce que la matriz $D$ tal que $Du^{(k)} = u^{(k-1)}$ es una matriz tridiagonal de la forma:
+
+\begin{center}
+    $D = \begin{bmatrix}
+        2\alpha + 1 & -\alpha     &             &         & 0           \\
+        -\alpha     & 2\alpha + 1 & -\alpha     &         &             \\
+                    & -\alpha     & 2\alpha + 1 & \ddots  &             \\
+                    &             & \ddots      & \ddots  & -\alpha     \\
+        0           &             &             & -\alpha & 2\alpha + 1 \\
+    \end{bmatrix}$
+\end{center}
+
+De tamaño $n$\texttt{x}$n$, siendo $n$ la cantidad de filas de $u$. 
+\clearpage
+Tanto en esta forma matricial como en \eqref{eq:difusión_despeje} queda evidenciado que $\alpha$ es un factor asociado a la tasa de difusión: a mayor $\alpha$, mayor la proporción de particulas que difunde desde una posición a sus posiciones vecinas desde el tiempo $k-1$ al tiempo siguiente $k$. 
+
+Se computó la evolución espacial y temporal resultante de aplicar iterativamente a $D$ sobre un vector $u^{(0)}$ de dimensión $n=101$ para distintos valores de $\alpha$, para un total de 1000 iteraciones, usando EG para matrices tridiagonales con precómputo (\algoref{alg:EG_tridiagonal_precomputo} y \algoref{alg:sol_tridiag_precomputo}). 
+
+Los elementos de $u^{(0)}$ fueron inicializados de forma tal que $u_i^{(0)} = 1$ si $i = 40 \hdots 60$ o $u_i^{(0)} = 0$ si no, lo que representa a un segmento lineal con concentración máxima alrededor de su punto medio y concentración nula hacia sus extremos. Los resultados se resumen en la figura \ref{fig:difusión}, en la que se puede observar que, como era de esperarse, a mayor $\alpha$ mayor es la tasa de difusión.
+
+\begin{figure}[h!]
+    \centering\includesvg[width=1.0\textwidth]{imgs/difusion.svg}
+    \caption{Simulación del proceso de difusión a lo largo del tiempo (eje x) y el espacio (eje y), por la aplicación iterativa de la forma matricial de la ecuación de difusión discreta en una dimensión.}
+    \label{fig:difusión}
+\end{figure}
+

@@ -1,0 +1,60 @@
+\section*{Apéndice}
+% \label{sec:apendice}
+\addcontentsline{toc}{section}{Apéndice}
+
+Todo el código necesario para computar los resultados mostrados y discutidos en este informe puede encontrarse en y ser ejecutado desde la siguiente Jupyter notebook: \href{https://colab.research.google.com/drive/1AtO3fGa4pEk_aWhHOXmj6WMH6FihLcvY?usp=sharing}{\textbf{\textcolor{blue}{link}}}.
+
+A continuación se comparten los pseudocódigos de algunos de los algoritmos auxiliares que fueron parte del diseño de los algoritmos principales ya presentados.
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$fila$, $columna$ vectores de dimensiones $1$\texttt{x}$n$ y $n$\texttt{x}$1$ respectivamente}
+\Ensure{$res$ escalar tal que $fila \cdot columna=res$}
+\Function{$producto\_escalar\_vector\_fila\_vector\_columna$}{$fila$, $columna$}
+    \State $res \gets 0$
+    \For{$i = 0 \hdots |fila|$}
+        \State $res \gets res + fila[i]*columna[i]$
+    \EndFor
+    \State \textbf{return} $res$
+\EndFunction
+\end{algorithmic}
+\caption{Producto escalar}
+\label{alg:producto_escalar}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$A$, $B$ matrices de la misma dimensión}
+\Ensure{$res$ matriz tal que $A+B=res$}
+\Function{$suma\_matricial$}{$A$, $B$}
+    \State $res \gets A$ \Comment{copia profunda}
+    \For{$i = 0 \hdots |A|$}
+        \For{$j = 0 \hdots |A[0]|$}
+            \State $res[i][j] \gets A[i][j] + B[i][j]$
+        \EndFor
+    \EndFor
+    \State \textbf{return} $res$
+\EndFunction
+\end{algorithmic}
+\caption{Suma de matrices}
+\label{alg:suma_matricial}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$A$ matriz}
+\Require{$k$ escalar}
+\Ensure{$res$ matriz tal que $kA=res$}
+\Function{$producto\_por\_escalar$}{$A$, $k$}
+    \State $res \gets A$ \Comment{copia profunda}
+    \For{$i = 0 \hdots |A|$}
+        \For{$j = 0 \hdots |A[0]|$}
+            \State $res[i][j] \gets k*A[i][j]$
+        \EndFor
+    \EndFor
+    \State \textbf{return} $res$
+\EndFunction
+\end{algorithmic}
+\caption{Producto por escalar}
+\label{alg:producto_por_escalar}
+\end{algorithm}

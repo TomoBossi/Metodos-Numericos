@@ -1,0 +1,143 @@
+\section{Sistemas de ecuaciones tridiagonales}
+\label{EG_tridiagonales}
+
+La representación matricial de un sistema de ecuaciones tridiagonal es de la forma:
+ 
+\begin{equation}
+\begin{bmatrix}
+   b_1 & c_1 &        &        &  0      \\
+   a_2 & b_2 & c_2    &        &         \\
+       & a_3 & b_3    & \ddots &         \\
+       &     & \ddots & \ddots & c_{n-1} \\
+   0   &     &        & a_n    & b_n
+\end{bmatrix}
+\begin{bmatrix}
+   x_1    \\
+   x_2    \\
+   x_3    \\
+   \vdots \\
+   x_n
+\end{bmatrix}
+=
+\begin{bmatrix}
+   d_1    \\
+   d_2    \\
+   d_3    \\
+   \vdots \\
+   d_n
+\end{bmatrix}
+.
+\label{eq:DEF_TRIDIAGONAL}
+\end{equation}
+
+La solución del sistema queda determinada por 4 vectores:  $a$, $b$, $c$ (las diagonales) y $d$ (el vector de términos independientes), todos de largo $n$, d\'onde se asume que $a_{1} = c_{n} = 0$. Esto permite diseñar un algoritmo más eficiente en tiempo y espacio que el de EG convencional.
+
+\subsection{Eliminaci\'on gaussiana para sistemas tridiagonales}
+\label{EG_tridiagonales_sin_precomputo}
+
+La estructura de los sistemas tridiagonales permite el desarrollo de un algoritmo que reduce la complejidad de resoluci\'on del sistema de $O(n^{3})$ a $O(n)$, descripto en \algoref{alg:EG_tridiagonal_sin_precomputo}. 
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$a$, $b$, $c$, $d$ vectores de largo $n$ con $a_1 = c_n = 0$}
+\Require{$atol$ tolerancia absoluta para la comparación con el 0}
+\Ensure{$x$ vector columna solución única del sistema tridiagonal. Si no existe solución única, devuelve una excepción}
+\Function{solucion\_sistema\_tridiagonal\_eliminacion\_gaussiana\_cuidadosa}{$a$, $b$, $c$, $d$, $atol$}
+    \State $x \gets d$ \Comment{copia profunda}
+    \For{$i = 1 \hdots n-1$}
+         \State \textbf{if} $b_i==0$ \textbf{then return Exception:} ''No puede encontrarse solución única''
+        \State \textbf{if} $|b_i| < atol$ \textbf{then print:} ''Advertencia: división por valor cercano a 0''
+        \State $\alpha \gets a_{i+1}/b_i$
+        \State $b_{i+1} \gets b_{i+1} - \alpha c_i$ 
+        \State $d_{i+1} \gets d_{i+1} - \alpha d_{i}$
+    \EndFor
+    \State \textbf{if} $b_n==0$ \textbf{then return Exception:} ''No puede encontrarse solución única''
+    \For{$i = n \hdots 2$}
+        \State \textbf{if} $|b_i| < atol$ \textbf{then print:} ''Advertencia: división por valor cercano a 0''
+        \State $\alpha \gets c_{i-1}/b_i$
+        \State $d_{i-1} \gets d_{i-1} - \alpha d_{i}$
+        \State $x_i \gets d_i/b_i$
+    \EndFor
+    \State $x_1 \gets d_1/b_1$
+    \State \textbf{return} $x$
+\EndFunction
+\end{algorithmic}
+\caption{Solución única de sistema tridiagonal}
+\label{alg:EG_tridiagonal_sin_precomputo}
+\end{algorithm}
+
+En un primer paso, el algoritmo recorre a $b$ desde adelante hacia atrás para anular por completo al vector $a$. Esto genera cambios sobre $b$ y $d$, pero no sobre $c$. En un segundo paso, recorre al $b$ modificado desde atrás hacia adelante para anular c, modificando nuevamente a $d$. Esto resulta en un único vector $b'$ que es diagonal única de la representación matricial del sistema, y un $d'$ que es el vector de términos independientes modificado por todas las operaciones realizadas. A partir de $b'$ y $d'$, hallar $x$ (si existe) es trivial.
+
+\subsection{Eliminaci\'on gaussiana en dos etapas para sistemas tridiagonales (precómputo)} \label{dos-etapas}
+\label{EG_tridiagonales_con_precomputo}
+
+Si se desea resolver una serie de sistemas de ecuaciones para una misma matriz de coeficientes, variando nada más que el vector de términos independientes, recomputar la enteritud de la EG para cada sistema es un desperdicio de recursos. Resulta más eficiente computar el resultado de realizar EG sobre la matriz de coeficientes una única vez, conservando de alguna manera toda la información necesaria sobre las operaciones realizadas en el proceso. Luego, esas mismas operaciones pueden ser aplicadas en el orden adecuado sobre cualquier vector de términos independientes sin necesidad de volver a operar sobre la matriz de coeficientes. En el caso de sistemas tridiagonales esto es particularmente sencillo, y el precómputo consiste en simplemente aplicar una versión modificada de \algoref{alg:EG_tridiagonal_sin_precomputo} que no recibe $d$ y devuelve $b'$ y el vector de las operaciones realizadas (los factores multiplicativos calculados) en orden. (\algoref{alg:EG_tridiagonal_precomputo}). Luego otro algoritmo puede ser utilizado para, a partir de $b'$, el vector de operaciones, y un vector $d$, operar sobre $d$ y resolver el sistema trivialmente (\algoref{alg:sol_tridiag_precomputo}).
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$b'$ vector diagonal del sistema diagonal}
+\Require{$d$ vector de términos independientes del sistema tridiagonal original}
+\Require{$operaciones$ vector de factores multiplicativos necesarios para operar sobre $d$}
+\Require{$atol$ tolerancia absoluta para la comparación con el 0}
+\Ensure{$x$ vector columna solución única del sistema tridiagonal original. Si no existe solución única, devuelve una excepción}
+\Function{solucion\_sistema\_tridiagonal\_precomputado}{$b'$, $d$, $operaciones$, $atol$}
+    \State $x \gets d$ \Comment{copia profunda}
+    \State $d' \gets preoperar\_d\_sistema\_tridiagonal(d, operaciones)$ \Comment{\algoref{alg:preoperar_d}}
+    \For{$i = 1 \hdots n$}
+         \State \textbf{if} $b'_i==0$ \textbf{then return Exception:} ''No puede encontrarse solución única''
+        \State \textbf{if} $|b'_i| < atol$ \textbf{then print:} ''Advertencia: división por valor cercano a 0''
+        \State $x_i \gets d'_i/b'_i$
+        \EndFor
+    \State \textbf{return} $x$
+\EndFunction
+\end{algorithmic}
+\caption{Solución única de sistema tridiagonal con precómputo}
+\label{alg:sol_tridiag_precomputo}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$d$ vector de longitud $n$ de los términos independientes del sistema tridiagonal}
+\Require{$operaciones$ vector de factores multiplicativos necesarios para operar sobre $d$, de longitud $2*(n - 1)$}
+\Ensure{$d$ vector de términos independientes modificado de acuerdo a $operaciones$ para corresponder con su sistema diagonal asociado}
+\Function{preoperar\_d\_sistema\_tridiagonal}{$d$, $operaciones$}
+    \For{$i = 1 \hdots n-1$}
+        \State $d_{i+1} \gets d_{i+1} - operaciones_i*d_i$ 
+    \EndFor
+    \For{$i = n \hdots 2$}
+        \State $d_{i-1} \gets d_{i-1} - operaciones_{2n-i}*d_i$ 
+    \EndFor
+    \State \textbf{return} $d$
+\EndFunction
+\end{algorithmic}
+\caption{Preoperaciones sobre el vector de términos independientes}
+\label{alg:preoperar_d}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Require{$a$, $b$, $c$ vectores de largo $n$ con $a_1 = c_n = 0$}
+\Require{$atol$ tolerancia absoluta para la comparación con el 0}
+\Ensure{$b'$ vector diagonal del sistema diagonal}
+\Ensure{$operaciones$ vector de factores multiplitcativos utilizados en la EG, en orden}
+\Function{precomputo\_sistema\_tridiagonal\_EG\_cuidadosa}{$a$, $b$, $c$, $atol$}
+    \State $operaciones \gets [\phantom{.}]$
+    \For{$i = 1 \hdots n-1$}
+         \State \textbf{if} $b_i==0$ \textbf{then return Exception:} ''No puede encontrarse solución única''
+        \State \textbf{if} $|b_i| < atol$ \textbf{then print:} ''Advertencia: división por valor cercano a 0''
+        \State $\alpha \gets a_{i+1}/b_i$
+        \State $operaciones \gets concatenar(operaciones, [\alpha])$ \Comment{agrega $\alpha$ al final de $operaciones$}
+        \State $b_{i+1} \gets b_{i+1} - \alpha c_i$
+    \EndFor
+    \State \textbf{if} $b_n==0$ \textbf{then return Exception:} ''No puede encontrarse solución única''
+    \For{$i = n \hdots 2$}
+        \State \textbf{if} $|b_i| < atol$ \textbf{then print:} ''Advertencia: división por valor cercano a 0''
+        \State $\alpha \gets c_{i-1}/b_i$
+        \State $operaciones \gets concatenar(operaciones, [\alpha])$
+    \EndFor
+    \State \textbf{return} $b, operaciones$
+\EndFunction
+\end{algorithmic}
+\caption{EG para sistemas tridiagonales (precómputo)}
+\label{alg:EG_tridiagonal_precomputo}
+\end{algorithm}

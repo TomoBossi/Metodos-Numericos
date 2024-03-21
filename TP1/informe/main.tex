@@ -1,0 +1,106 @@
+% Caratula y formato
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{a4wide}
+\usepackage{caratula}
+\usepackage{amsfonts}
+\usepackage{placeins}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Matrices 
+\usepackage{amsmath}
+\usepackage{mathtools}
+
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{#1}}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Pseudocódigo
+\usepackage[noend]{algpseudocode}
+\usepackage{algorithm}
+\algnewcommand{\IfThenElse}[3]{\State \algorithmicif\ #1\ \algorithmicthen\ #2\ \algorithmicelse\ #3}
+\algnewcommand{\IfThen}[2]{\State \algorithmicif\ #1\ \algorithmicthen\ #2}
+
+% Comandos para tener Input y Output en el enviroment de algorithmic
+%\floatname{algorithm}{Procedure}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+
+% Funciones de algorithmic sin nombre en mayuscula
+% https://tex.stackexchange.com/questions/150184/how-to-avoid-uppercase-function-name-while-using-function
+\algrenewcommand\textproc{} % Used to be \textsc
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{hyperref}
+
+% Comandos redefinidos
+% https://tex.stackexchange.com/questions/69358/how-to-style-equation-label-and-reference-differently
+\makeatletter
+\def\tagform@#1{\maketag@@@{(\ignorespaces{#1}\unskip\@@italiccorr)}}
+\renewcommand{\eqref}[1]{\textbf{eq. (\ref{#1})}}
+
+% Distinto de \algref de algorithmicx
+% Con esto podemos referenciar todo un algoritmo (quizas es mejor meterlo en una figura)
+\newcommand{\algoref}[1]{\textbf{alg. (\ref{#1})}}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[shortlabels]{enumitem}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figuras
+\usepackage{svg}
+\usepackage{caption}
+\usepackage{subcaption}
+\newcommand{\figref}[1]{\textbf{fig.} \ref{#1}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\materia{Métodos numéricos}
+\submateria{2do cuatrimestre 2023}
+\titulo{Trabajo práctico 1}
+\subtitulo{Eliminación gaussiana, matrices tridiagonales y difusión}
+\integrante{Tomás Bossi}{50/17}{tomasbossi97@gmail.com}
+\integrante{Ignacio Enrique Niesz}{722/10}{ignacio.niesz@gmail.com}
+\integrante{Brian Ivan Rios}{917/19}{ivan.rios2010@gmail.com}
+
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{2mm}
+
+\begin{document}
+
+\maketitle
+\tableofcontents 
+
+\clearpage
+\input{sections/0-Intro}
+
+\clearpage
+\input{sections/1-Sistemas-Ecuaciones}
+
+\clearpage
+\input{sections/2-Sistemas-Ecuaciones-Tridiagonales}
+
+\clearpage
+\input{sections/3-Metricas}
+
+\clearpage
+\input{sections/4-Aplicaciones/main}
+
+\clearpage
+\input{sections/5-Conclusion}
+
+\clearpage
+\input{sections/6-Referencias}
+
+\clearpage
+\input{sections/7-Apendice}
+
+\end{document}

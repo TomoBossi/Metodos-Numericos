@@ -1,0 +1,13 @@
+\Function{MetodoPotencia}{$A$, $niter$, $\epsilon$}
+    \State $numRows \gets \text{\# de filas de } A$
+    \State $v \gets \text{Vector aleatorio de tamaño } numRows$ %\Comment{Autovector inicial}
+    \For{$i \gets 0$ to $niter - 1$}
+        \State $v\_previo \gets v$
+        \State $v \gets A \cdot v$
+        \State $v \gets \frac{v}{\|v\|}$ %\Comment{Normaliza el v}
+        \If{$\left| v^T \cdot v\_previo - 1.0 \right| < \epsilon$}
+            \State \textbf{break}
+        \EndIf
+    \EndFor
+    \State \Return $v$
+\EndFunction

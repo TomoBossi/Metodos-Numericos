@@ -1,0 +1,54 @@
+\section{Tiempos de ejecuci\'on}
+\label{tiempos}
+
+Para medir tiempos de cómputo en función del tamaño de la matriz input, se eligió como métrica al tiempo de ejecución mínimo a partir de $n\_rep$ repeticiones. Más especificamente, para cada algoritmo y bajo cada condición, se utilizó al comando \texttt{\%timeit} de IPython\cite{timeit} para realizar $n\_rep*k$ mediciones individuales totales, separadas en grupos de $k$ ejecuciones cada uno. En todos los casos se midió el \textit{CPU User time}\cite{patterson}. El tiempo informado $MT$ (por Mejor Tiempo) para un dado algoritmo para un dado tamaño del input es el mínimo de los tiempos promedio de cada uno de esos $n\_rep$ grupos de $k$ ejecuciones:
+
+$$MT = \min\limits_{i = 1,...,n\_rep} {\{\frac{1}{k}\sum\limits_{j = 1}^{k}{med_{ij}}\}}$$
+
+Donde $med_{ij}$ es la medición individual $j$ (de $k$ mediciones por grupo) del grupo de mediciones $i$ (de $n\_rep$ grupos).
+
+Las matrices de prueba fueron en todos los casos precomputadas, de forma tal que el tiempo necesario para su generación no forma parte de las mediciones. Para la comparación entre tanto los algoritmos de EG común con y sin pivoteo como entre EG con pivoteo y EG para tridiagonales, se procuró para cada tamaño de matriz analizado siempre utilizar al mismo grupo de $n\_rep*k$ matrices precomputadas. En todos los casos se usó al vector columna $(1, 1, \hdots, 1)^T$ de la dimensión correspondiente como vector de términos independientes.
+
+Para el caso particular de la medición de tiempos de cómputo para comparar al algoritmo de EG para tridiagonales con y sin precómputo, se utilizó como métrica al mínimo de los tiempos totales de ejecución de cada uno de los $n\_rep$ grupos, que equivale simplemente a calcular $k*MT$. Se utilizaron únicamente 4 matrices tridiagonales generadas al azar, una para cada tamaño de matriz analizado ($32$\texttt{x}$32$, $64$\texttt{x}$64$, $96$\texttt{x}$96$ y $128$\texttt{x}$128$).
+
+Las mediciones se resumen en las figuras \ref{fig:EG_sin_vs_con_pivoteo}, \ref{fig:EG_tridiagonales} y \ref{fig:EG_tridiag_sin_vs_con_precomp}. En todos los casos, se obtuvieron los resultados esperados de acuerdo a nuestros conocimientos previos sobre los algoritmos analizados. 
+
+Se encontró que los algoritmos de EG común con y sin pivoteo parcial son muy similares entre sí en cuanto a sus tiempos de cómputo, por lo menos para los tamaños de matriz analizados. Los resultados comprueban además que ambos algoritmos son aproximadamente $O(n^3)$ (figura \ref{fig:EG_sin_vs_con_pivoteo}).
+
+Por otro lado, se observó que al operar sobre sistemas tridiagonales el algoritmo diseñado específicamente para este tipo de matrices es muy significativamente más rápido que el algoritmo de EG común con pivoteo parcial (figura \ref{fig:EG_con_pivoteo_vs_tridiagonales}). Por ejemplo, para el caso puntual de matrices tridiagonales de tamaño $128$\texttt{x}$128$, el algoritmo de EG para tridiagonales es más de 200 veces más rápido. Esta diferencia en velocidad se debe mayormente a la diferencia cualitativa en la complejidad de estos algoritmos, siendo el algorítmo de EG para tridiagonales de complejidad $O(n)$ (figura \ref{fig:EG_tridiagonales_solo}).
+
+\clearpage
+\begin{figure}[!ht]
+    \centering\includesvg[width=0.6\textwidth]{imgs/EG_sin_vs_con_pivoteo.svg}
+    \caption{Tiempos de cómputo vs tamaño de la matriz input para los algoritmos de EG convencional con y sin pivoteo (\algoref{alg:eg_con_pivoteo}, \algoref{alg:eg_sin_pivoteo}). Se utilizó $k=10$ y $n\_rep=100$, con 1000 matrices triangulares inferiores pregeneradas para cada tamaño. Se muestra también el mejor ajuste por cuadrados mínimos a los datos (sin pivoteo) con un polinomio grado 3.}
+    \label{fig:EG_sin_vs_con_pivoteo}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{imgs/EG_con_pivoteo_vs_tridiag_log.svg}
+        \caption{}
+        \label{fig:EG_con_pivoteo_vs_tridiagonales}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{imgs/EG_tridiag.svg}
+        \caption{}
+        \label{fig:EG_tridiagonales_solo}
+    \end{subfigure}
+    \caption{Tiempos de cómputo vs tamaño de la matriz input para los algoritmos de EG convencional con pivoteo y de EG para matrices tridiagonales sin precómputo (\algoref{alg:eg_con_pivoteo}, \algoref{alg:EG_tridiagonal_sin_precomputo}). \textbf{(a)} Comparación entre ambos algoritmos en escala logarítmica. Se utilizó $k=50$ y $n\_rep=100$, con 5000 matrices tridiagonales pregeneradas para cada tamaño. \textbf{(b)} Resultados para el algoritmo de EG para matrices tridiagonales sin precómputo con $k=1000$, $n\_rep=200$ y 200000 triplas de diagonales de matrices tridiagonales pregeneradas.}
+    \label{fig:EG_tridiagonales}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering\includesvg[width=1.0\textwidth]{imgs/EG_tridiag_sin_vs_con_precomp.svg}
+    \caption{Tiempos de cómputo vs cantidad de repeticiones de la ejecución del programa ($k$) para los algoritmos de EG para matrices tridiagonales con y sin precómputo (\algoref{alg:sol_tridiag_precomputo}, \algoref{alg:EG_tridiagonal_sin_precomputo}). Se utilizo $n\_rep=100$ con $k$ variable. Para cada uno de los cuatro tamaños de matriz analizados se pregeneró una única tripla de diagonales al azar.}
+    \label{fig:EG_tridiag_sin_vs_con_precomp}
+\end{figure}
+
+En cuanto a la diferencia entre el algoritmo de EG para tridiagonales con y sin precómputo, de los resultados puede concluirse que con precómputo el algoritmo es más rápido, aunque no deja de ser de complejidad $O(n)$. El efecto del precómputo es relativamente mayor cuantas más repeticiones son realizadas y cuanto más grande (y costosa de preprocesar) es la matriz input, como era esperable (figura \ref{fig:EG_tridiag_sin_vs_con_precomp}).
+
+Para lograr resultados estables y reproducibles fue necesario realizar las mediciones de tiempos de ejecución localmente, no en los servidores de Google Colab.

@@ -1,0 +1,8 @@
+\Function{MinimosCuadradosRidge}{$X, y, \lambda$}
+    \State $U, valores\_singulares, V^T \gets \Call{SVD}{X}$
+    \State $D \gets \Call{Diag}{
+        valores\_singulares / (valores\_singulares^2 + \lambda)
+        }$
+    \State $\beta \gets {V^T}^T \cdot {D} \cdot {U}^T \cdot {y}$
+    \State \Return $\beta$
+\EndFunction

@@ -1,0 +1,6 @@
+\Function{MinimosCuadrados}{$X, y$}
+    \State $U, valores\_singulares, V^T \gets \Call{SVD}{X}$
+    \State $D \gets \Call{Diag}{1/valores\_singulares}$
+    \State $\beta \gets {V^T}^T \cdot {D} \cdot {U}^T \cdot {y}$
+    \State \Return $\beta$
+\EndFunction
